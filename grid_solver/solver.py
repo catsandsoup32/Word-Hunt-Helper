@@ -1,17 +1,19 @@
 import trie as trie
 from trie import TrieNode
-import random, copy
-
+from typing import Optional
+import copy
 
 NUM_ROWS = NUM_COLS = 4
-
-root = TrieNode()
-with open("word_list.txt", "r") as f:
-    for line in f:
-        line = line.strip() 
-        trie.insert(root, line)
-
 directions = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
+
+
+def build_trie(root):
+    with open("grid_solver/word_list.txt", "r") as f:
+        for line in f:
+            line = line.strip() 
+            trie.insert(root, line)
+
+
 def get_valid_directions(grid, curr_pos, positions, node):
     """Returns a list of (x,y) coords that are in-bounds, non-visited, and that are viable prefixes"""
     valid_directions = []
@@ -48,16 +50,16 @@ def search_all(grid, word_hash, curr_pos, positions, prefix, node):
         positions.pop((row, col))
 
 
-def solve(terminal: bool, pause_print: bool):
+def solve(pause_print, photo):
     """
     Args: 
-        terminal: Whether to enter characters in terminal or to infer from photo
         pause_print: Whether to print solutions drawn on grid with pauses between each
+        photo: Fix this docstring
     """
     grid = []
     word_hash = {}
 
-    if terminal: 
+    if photo is None: 
         print("(all lowercase input)")
         for i in range(1, NUM_ROWS+1):
             n = 0
@@ -95,8 +97,7 @@ def solve(terminal: bool, pause_print: bool):
             input("Press enter for next")
 
     
-if __name__ == "__main__":
-    solve(
-        terminal = True,
-        pause_print = False
-    )
+if __name__ == "__main__": # For laptop only
+    root = TrieNode()
+    build_trie(root)
+    solve(True, None)

@@ -169,3 +169,55 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# Executables and libraries
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# Object files
+*.o
+*.obj
+
+# Dependency directories
+/lib/
+/Libs/
+
+# Build artifacts
+/build/
+/bin/
+/out/
+
+# Debug files
+*.pdb
+*.dSYM/
+
+# Cache files
+*.swp
+*.swo
+.vscode/
+
+# System files
+.DS_Store
+
+# Qt-related files
+ui_*.h
+moc_*.cpp
+qrc_*.cpp
+
+# CMake build files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# Visual Studio files
+*.sln
+*.suo
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+ipch/

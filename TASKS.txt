@@ -1,0 +1,12 @@
+- waiting to get RPI camera working
+    - then can get grid dataset
+
+- want to get to a point where RPI can fully return solved grid
+- this has to be reconstructed in Arduino C++ (should be fine)
+
+
+- Need to figure out everything for motors
+- 3D print (can do this one at a time)
+- arms and joints
+- Motor drivers
+- IK
