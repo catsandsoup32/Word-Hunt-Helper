@@ -39,9 +39,11 @@ class SmallCNN(nn.Module): # Short single layer conv blocks
         return x
     
 # TODO: find mean and STD of training set
+def random_augmentation():
+    pass
+
 def get_transform():
     return transforms.Compose([
-        transforms.Resize((32, 32)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])

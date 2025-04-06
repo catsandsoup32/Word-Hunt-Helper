@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 from PIL import Image
 
-def parse_boxes(image_path: str, show_process: bool):
-    """Returns a list of (x, y, w, h) tuples for bounding boxes in L2R T2B order"""
+def parse_boxes(image_path, show_process):
+    """Returns a list of (x, y, w, h) tuples for bounding boxes in L2R T2B order, and the preprocessed image"""
     image = cv2.imread(image_path)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blur = cv2.medianBlur(gray, 5)
@@ -37,12 +37,24 @@ def parse_boxes(image_path: str, show_process: bool):
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    return sorted(boxes, key=lambda box: box[1] + box[0]*0.1)
+    return sorted(boxes, key=lambda box: box[1] + box[0]*0.1), Image.fromarray(close)
 
-def get_grid(image_path: str, show_process: bool):
+def get_images(preprocessed_image, boxes):
+    cells = []
+    for box in boxes:
+        # crop takes in (left, upper, right, lower)
+        formatted_box = (box[0], box[1], box[0]+box[2], box[1]+box[3]) 
+        cells.append(preprocessed_image.crop(formatted_box).resize((32, 32)))
+    return cells # Grayscale, resized PIL images
+
+def get_grid(image_path, show_process):
     """Returns grid as nested list"""
-    boxes = parse_boxes()
-    # Need to get screenshots now
+    boxes, preprocessed_im = parse_boxes(image_path, show_process)
+    image_list = get_images(preprocessed_im, boxes)
+    for image in image_list:
+        pass
 
 
-test = parse_boxes("grid_solver/character_recognition/JsxLT.jpg", False)
+test, pre_im = parse_boxes("grid_solver/character_recognition/JsxLT.jpg", False)
+print(test)
+get_images(pre_im, test)
