@@ -1,10 +1,19 @@
+# Helper to convert the grid photo into a grid of characters
+
 import cv2
 import numpy as np
 from PIL import Image
 
-def parse_boxes(image_path, show_process):
+def parse_boxes(image_path_or_obj, show_process):
     """Returns a list of (x, y, w, h) tuples for bounding boxes in L2R T2B order, and the preprocessed image"""
-    image = cv2.imread(image_path)
+    
+    if isinstance(image_path_or_obj, str):
+        image = cv2.imread(image_path_or_obj)
+    elif isinstance(image_path_or_obj, np.ndarray):
+        image = image_path_or_obj
+    else:
+        image = np.asarray(image_path_or_obj)
+
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blur = cv2.medianBlur(gray, 5)
     sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
@@ -39,22 +48,33 @@ def parse_boxes(image_path, show_process):
 
     return sorted(boxes, key=lambda box: box[1] + box[0]*0.1), Image.fromarray(close)
 
-def get_images(preprocessed_image, boxes):
+def get_images(preprocessed_image, boxes, show_process):
     cells = []
     for box in boxes:
         # crop takes in (left, upper, right, lower)
         formatted_box = (box[0], box[1], box[0]+box[2], box[1]+box[3]) 
-        cells.append(preprocessed_image.crop(formatted_box).resize((32, 32)))
-    return cells # Grayscale, resized PIL images
+        cells.append(preprocessed_image.crop(formatted_box))
+    if show_process: 
+        for i in range(16): cells[i].save(f"character_recognition/clean_images/{i}.png") 
+    return cells # Grayscale PIL images
 
-def get_grid(image_path, show_process):
-    """Returns grid as nested list"""
-    boxes, preprocessed_im = parse_boxes(image_path, show_process)
-    image_list = get_images(preprocessed_im, boxes)
-    for image in image_list:
-        pass
+def get_grid(image_path_or_obj, show_process, grid):
+    """Edits grid parameter to be nested list of characters.
+       Uses image hashing to convert image to character.
+    """
+    boxes, preprocessed_im = parse_boxes(image_path_or_obj, show_process)
+    image_list = get_images(preprocessed_im, boxes, show_process)
 
+    for i in range(4):
+        row = []
+        list_split = image_list[i*4: i*4 + 4]
+        for image in list_split:
+            pred = 'a'
+            row.append(pred)
+        grid.append(row)
+    
 
-test, pre_im = parse_boxes("grid_solver/character_recognition/JsxLT.jpg", False)
-print(test)
-get_images(pre_im, test)
+# Testing
+if __name__ == "__main__":
+    grid = []
+    get_grid("character_recognition/IMG_8220.jpeg", True, grid)

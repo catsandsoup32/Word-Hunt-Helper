@@ -2,6 +2,8 @@ import trie as trie
 from trie import TrieNode
 from typing import Optional
 import copy
+from character_recognition.custom_parse import get_grid
+from PIL import Image
 
 NUM_ROWS = NUM_COLS = 4
 directions = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
@@ -50,11 +52,11 @@ def search_all(grid, word_hash, curr_pos, positions, prefix, node):
         positions.pop((row, col))
 
 
-def solve(pause_print, photo):
+def solve(pause_print: bool, photo: Optional[Image.Image]):
     """
     Args: 
-        pause_print: Whether to print solutions drawn on grid with pauses between each
-        photo: Fix this docstring
+        pause_print (bool): Whether to print solutions drawn on grid.
+        photo (PIL image or None): If None, grid must be entered manually. 
     """
     grid = []
     word_hash = {}
@@ -68,8 +70,11 @@ def solve(pause_print, photo):
                 n = len(row)
                 grid.append(list(row))
     else:
-        # Put camera code here
-        pass
+        get_grid (
+            image_path_or_obj = photo,
+            show_process = False,
+            grid = grid
+        )
     
     for row in range(NUM_ROWS):
         for col in range(NUM_COLS):
@@ -80,7 +85,9 @@ def solve(pause_print, photo):
 
 
     sorted_hash = sorted(word_hash.items(), key=lambda item: len(item[0]), reverse=True)
-    print(sorted_hash)
+    print(f"\nGrid:\n")
+    for i in range(NUM_ROWS): print("   ".join(grid[i]))
+    print(f"\nFound words:\n{sorted_hash}")
 
     if pause_print:
         for word, positions in sorted_hash:
@@ -95,9 +102,12 @@ def solve(pause_print, photo):
                 print("   ".join(temp_grid[i]))
             
             input("Press enter for next")
+    
+    return sorted_hash
 
     
-if __name__ == "__main__": # For laptop only
+#  For laptop only
+if __name__ == "__main__":
     root = TrieNode()
     build_trie(root)
-    solve(True, None)
+    solve(True, Image.open("grid_solver/character_recognition/JsxLT.jpg"))
