@@ -3,6 +3,8 @@
 import cv2
 import numpy as np
 from PIL import Image
+import os
+from image_similarity import simple_pixel_diff, p_hash_diff, generate_ground_truth_hashes
 
 def parse_boxes(image_path_or_obj, show_process):
     """Returns a list of (x, y, w, h) tuples for bounding boxes in L2R T2B order, and the preprocessed image"""
@@ -55,7 +57,9 @@ def get_images(preprocessed_image, boxes, show_process):
         formatted_box = (box[0], box[1], box[0]+box[2], box[1]+box[3]) 
         cells.append(preprocessed_image.crop(formatted_box))
     if show_process: 
-        for i in range(16): cells[i].save(f"character_recognition/clean_images/{i}.png") 
+        for i in range(16): 
+            cells[i].show() 
+            break
     return cells # Grayscale PIL images
 
 def get_grid(image_path_or_obj, show_process, grid):
@@ -64,12 +68,13 @@ def get_grid(image_path_or_obj, show_process, grid):
     """
     boxes, preprocessed_im = parse_boxes(image_path_or_obj, show_process)
     image_list = get_images(preprocessed_im, boxes, show_process)
+    clean_hashes = generate_ground_truth_hashes()
 
     for i in range(4):
         row = []
         list_split = image_list[i*4: i*4 + 4]
         for image in list_split:
-            pred = 'a'
+            pred = p_hash_diff(image, clean_hashes)
             row.append(pred)
         grid.append(row)
     
@@ -77,4 +82,5 @@ def get_grid(image_path_or_obj, show_process, grid):
 # Testing
 if __name__ == "__main__":
     grid = []
-    get_grid("character_recognition/IMG_8220.jpeg", True, grid)
+    get_grid(r"C:\Users\edmun\Desktop\VSCode Projects\Word-Hunt\grid_solver\character_recognition\data\pre_data_used\7.jpg", False, grid)
+    print(grid)
