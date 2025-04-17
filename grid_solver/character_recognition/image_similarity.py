@@ -5,7 +5,6 @@ import numpy as np
 import os
 from PIL import Image
 from scipy.fftpack import dct
-import imagehash
 
 clean_images_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "clean_images")
 
@@ -26,7 +25,12 @@ def simple_pixel_diff(image):
 
 def p_hash(image):
     if isinstance(image, str): image = Image.open(image)
-    return str(imagehash.phash(image))
+    image = np.asarray(image.resize((32, 32)), dtype=np.float32)
+    dct_image = dct(dct(image, axis=0), axis=1)
+    dct_low_freq = dct_image[:8, :8]
+    median = np.median(dct_low_freq)
+    diff = dct_low_freq > median
+    return ''.join(['1' if x else '0' for x in diff.flatten()])
 
 def generate_ground_truth_hashes():
     hashes = []
@@ -49,7 +53,6 @@ def p_hash_diff(image, clean_hashes):
             min_idx = idx
     return chr(ord('a') + min_idx)
 
-# clean_hashes = generate_ground_truth_hashes()
-# print(p_hash_diff(
-#     r"C:\Users\edmun\Desktop\VSCode Projects\Word-Hunt\grid_solver\character_recognition\s.PNG", clean_hashes))
 
+clean_hashes = generate_ground_truth_hashes()
+print(p_hash_diff(r"C:\Users\edmun\Desktop\VSCode Projects\Word-Hunt\grid_solver\character_recognition\s.PNG", clean_hashes))
