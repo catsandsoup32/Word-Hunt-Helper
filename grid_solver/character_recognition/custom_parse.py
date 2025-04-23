@@ -1,9 +1,8 @@
-# Helper to convert the grid photo into a grid of characters
+# Helper to convert the grid photo into a grid of characters.
 
 import cv2
 import numpy as np
 from PIL import Image
-import os
 
 def parse_boxes(image_path_or_obj, show_process):
     """Returns a list of (x, y, w, h) tuples for bounding boxes in L2R T2B order, and the preprocessed image"""
@@ -62,6 +61,29 @@ def get_images(preprocessed_image, boxes, show_process):
             
     return cells # Grayscale PIL images
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+# need character_recognition prepend when calling from grid_solver directory
+
+from character_recognition.model import SmallCNN, logits_to_class
+import torch, os
+from character_recognition.image_transform import get_torch_transform, PIL_transform
+from character_recognition.image_similarity import generate_ground_truth_hashes, p_hash_diff
+
+model = SmallCNN()
+model.load_state_dict(
+    torch.load("character_recognition/weights/3_epochs.pth", weights_only=True)
+)
+model.eval()
+transform = get_torch_transform()
+
+clean_hashes = generate_ground_truth_hashes()
+
+def CNN_classify(image):
+    transformed_image = transform(image).unsqueeze(dim=0)
+    pred = model(transformed_image)
+    pred = logits_to_class(pred)
+    return pred
+
 def get_grid(image_path_or_obj, show_process, grid):
     """Edits grid parameter to be nested list of characters.
        Uses perceptual hashing / CNN to convert image to character.
@@ -73,8 +95,10 @@ def get_grid(image_path_or_obj, show_process, grid):
         row = []
         list_split = image_list[i*4: i*4 + 4]
         for image in list_split:
-            #pred = model(image)
-            pred = 'a'
+            image = PIL_transform(image)
+            pred, confidence = p_hash_diff(image, clean_hashes)
+            if (confidence < 0.8):
+                pred = CNN_classify(image)
             row.append(pred)
         grid.append(row)
     
@@ -83,7 +107,7 @@ def get_grid(image_path_or_obj, show_process, grid):
 if __name__ == "__main__":
     grid = []
     get_grid(
-        r"C:\Users\edmun\Desktop\VSCode Projects\Word-Hunt\grid_solver\character_recognition\IMG_8229.jpeg", 
+        "test2.jpg", 
         show_process=True, 
         grid=grid)
     print(grid)

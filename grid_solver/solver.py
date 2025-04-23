@@ -10,7 +10,7 @@ directions = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 
 
 
 def build_trie(root):
-    with open("grid_solver/word_list.txt", "r") as f:
+    with open("word_list.txt", "r") as f:
         for line in f:
             line = line.strip() 
             trie.insert(root, line)
@@ -52,7 +52,7 @@ def search_all(grid, word_hash, curr_pos, positions, prefix, node):
         positions.pop((row, col))
 
 
-def solve(pause_print: bool, photo: Optional[Image.Image]):
+def solve(pause_print: bool, photo: Optional[Image.Image], show_process=False):
     """
     Args: 
         pause_print (bool): Whether to print solutions drawn on grid.
@@ -72,7 +72,7 @@ def solve(pause_print: bool, photo: Optional[Image.Image]):
     else:
         get_grid (
             image_path_or_obj = photo,
-            show_process = False,
+            show_process = show_process,
             grid = grid
         )
     
@@ -95,9 +95,9 @@ def solve(pause_print: bool, photo: Optional[Image.Image]):
             for i, coord in enumerate(positions):
                 r, c = coord[0], coord[1]
                 curr_char = temp_grid[r][c]
-                temp_grid[r][c] = "\033[31m" + curr_char + "\033[0m"
+                temp_grid[r][c] = "\033[34m" + curr_char + "\033[0m"
             
-            print("\033[31m" + word + "\033[0m")
+            print(f"\033[31m" + word + "\033[0m")
             for i in range(NUM_ROWS):
                 print("   ".join(temp_grid[i]))
             
@@ -110,4 +110,4 @@ def solve(pause_print: bool, photo: Optional[Image.Image]):
 if __name__ == "__main__":
     root = TrieNode()
     build_trie(root)
-    solve(True, Image.open("grid_solver/character_recognition/JsxLT.jpg"))
+    solve(True, Image.open("character_recognition/test2.jpg"))
