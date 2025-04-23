@@ -17,7 +17,7 @@ def build_trie(root):
 
 
 def get_valid_directions(grid, curr_pos, positions, node):
-    """Returns a list of (x,y) coords that are in-bounds, non-visited, and that are viable prefixes"""
+    """Returns a list of (x,y) coords that are in-bounds, non-visited, and that are viable prefixes."""
     valid_directions = []
 
     for coord in directions:
@@ -52,7 +52,7 @@ def search_all(grid, word_hash, curr_pos, positions, prefix, node):
         positions.pop((row, col))
 
 
-def solve(pause_print: bool, photo: Optional[Image.Image], show_process=False):
+def solve(root: TrieNode, pause_print: bool, photo: Optional[Image.Image], show_process=False):
     """
     Args: 
         pause_print (bool): Whether to print solutions drawn on grid.
@@ -110,4 +110,4 @@ def solve(pause_print: bool, photo: Optional[Image.Image], show_process=False):
 if __name__ == "__main__":
     root = TrieNode()
     build_trie(root)
-    solve(True, Image.open("character_recognition/test2.jpg"))
+    solve(root, True, Image.open("character_recognition/test2.jpg"))

@@ -71,7 +71,9 @@ from character_recognition.image_similarity import generate_ground_truth_hashes,
 
 model = SmallCNN()
 model.load_state_dict(
-    torch.load("character_recognition/weights/3_epochs.pth", weights_only=True)
+    torch.load("character_recognition/weights/3_epochs.pth", 
+               map_location=torch.device("cpu"),
+               weights_only=True)
 )
 model.eval()
 transform = get_torch_transform()
@@ -97,7 +99,7 @@ def get_grid(image_path_or_obj, show_process, grid):
         for image in list_split:
             image = PIL_transform(image)
             pred, confidence = p_hash_diff(image, clean_hashes)
-            if (confidence < 0.8):
+            if (confidence < 1): # TODO: better hash function...
                 pred = CNN_classify(image)
             row.append(pred)
         grid.append(row)

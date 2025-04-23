@@ -38,7 +38,7 @@ def get_mean_std():
     return [mean], [std]
 
 def get_torch_transform():
-    mean, std = get_mean_std()
+    mean, std = [0.14148982804599827], [0.31596098994015237] # get_mean_std()
     transform = transforms.Compose([
         transforms.Grayscale(),
         transforms.ToTensor(),
