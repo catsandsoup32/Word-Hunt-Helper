@@ -1,5 +1,7 @@
 # Data
 *data
+*pre_data
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

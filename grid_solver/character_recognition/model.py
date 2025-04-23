@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision.transforms as transforms
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride):
@@ -38,12 +37,6 @@ class SmallCNN(nn.Module): # Short single layer conv blocks
         x = self.fc_out(x)
         return x
     
-# TODO: find mean and STD of training set
-def random_augmentation():
-    pass
-
-def get_transform():
-    return transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    ])
+def logits_to_class(pred: torch.Tensor):
+    idx = torch.argmax(pred)
+    return chr(ord('a') + idx)

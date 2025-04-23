@@ -1,10 +1,8 @@
-# Helper to convert the grid photo into a grid of characters
+# Helper to convert the grid photo into a grid of characters.
 
 import cv2
 import numpy as np
 from PIL import Image
-import os
-from image_similarity import simple_pixel_diff, p_hash_diff, generate_ground_truth_hashes
 
 def parse_boxes(image_path_or_obj, show_process):
     """Returns a list of (x, y, w, h) tuples for bounding boxes in L2R T2B order, and the preprocessed image"""
@@ -15,7 +13,7 @@ def parse_boxes(image_path_or_obj, show_process):
         image = image_path_or_obj
     else:
         image = np.asarray(image_path_or_obj)
-
+    
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blur = cv2.medianBlur(gray, 5)
     sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
@@ -58,23 +56,49 @@ def get_images(preprocessed_image, boxes, show_process):
         cells.append(preprocessed_image.crop(formatted_box))
     if show_process: 
         for i in range(16): 
-            cells[i].show() 
             break
+            cells[i].show() 
+            
     return cells # Grayscale PIL images
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+# need character_recognition prepend when calling from grid_solver directory
+
+from character_recognition.model import SmallCNN, logits_to_class
+import torch, os
+from character_recognition.image_transform import get_torch_transform, PIL_transform
+from character_recognition.image_similarity import generate_ground_truth_hashes, p_hash_diff
+
+model = SmallCNN()
+model.load_state_dict(
+    torch.load("character_recognition/weights/3_epochs.pth", weights_only=True)
+)
+model.eval()
+transform = get_torch_transform()
+
+clean_hashes = generate_ground_truth_hashes()
+
+def CNN_classify(image):
+    transformed_image = transform(image).unsqueeze(dim=0)
+    pred = model(transformed_image)
+    pred = logits_to_class(pred)
+    return pred
 
 def get_grid(image_path_or_obj, show_process, grid):
     """Edits grid parameter to be nested list of characters.
-       Uses image hashing to convert image to character.
+       Uses perceptual hashing / CNN to convert image to character.
     """
     boxes, preprocessed_im = parse_boxes(image_path_or_obj, show_process)
     image_list = get_images(preprocessed_im, boxes, show_process)
-    clean_hashes = generate_ground_truth_hashes()
 
     for i in range(4):
         row = []
         list_split = image_list[i*4: i*4 + 4]
         for image in list_split:
-            pred = p_hash_diff(image, clean_hashes)
+            image = PIL_transform(image)
+            pred, confidence = p_hash_diff(image, clean_hashes)
+            if (confidence < 0.8):
+                pred = CNN_classify(image)
             row.append(pred)
         grid.append(row)
     
@@ -82,5 +106,8 @@ def get_grid(image_path_or_obj, show_process, grid):
 # Testing
 if __name__ == "__main__":
     grid = []
-    get_grid(r"C:\Users\edmun\Desktop\VSCode Projects\Word-Hunt\grid_solver\character_recognition\data\pre_data_used\7.jpg", False, grid)
+    get_grid(
+        "test2.jpg", 
+        show_process=True, 
+        grid=grid)
     print(grid)
